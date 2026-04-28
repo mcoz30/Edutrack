@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edutrack - Navigate your Future!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Professional Deep Slate Background */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #020617 0%, #0f172a 50%, #1e3a8a 100%);
+            color: #f8fafc;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Deep Glassmorphism Panel */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-top: 1px solid rgba(255, 255, 255, 0.25);
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255,255,255,0.05) inset;
+        }
+
+        /* Inner Glass Elements */
+        .glass-inner {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Motion Animations for UI elements */
+        .fade-in {
+            animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.8), rgba(29, 78, 216, 0.8));
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 1), rgba(29, 78, 216, 1));
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+            border-color: rgba(96, 165, 250, 0.6);
+        }
+
+        .option-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .option-btn:hover {
+            transform: translateY(-3px);
+            border-color: rgba(96, 165, 250, 0.5);
+            background-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Canvas fixed to background */
+        #network-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.02);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.4);
+        }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <!-- Professional Network Background Canvas -->
+    <canvas id="network-canvas"></canvas>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <!-- Main Application Container -->
+    <main class="flex-grow flex flex-col items-center justify-center p-4 relative z-10">
+        
+        <div class="glass-panel w-full max-w-3xl rounded-3xl overflow-hidden mt-8">
+            
+            <!-- Navbar -->
+            <header class="border-b border-white/10 p-6 flex justify-between items-center bg-white/5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)] border border-blue-300/30">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                        </svg>
+                    </div>
+                    <span class="font-extrabold text-2xl tracking-tight text-white">Edutrack</span>
+                </div>
+                <button onclick="app.showScreen('history')" id="history-btn" class="hidden text-sm border border-white/20 bg-white/5 hover:bg-white/10 text-white font-semibold px-4 py-2 rounded-lg transition backdrop-blur-sm">
+                    View History
+                </button>
+            </header>
+
+            <div class="p-8 md:p-12">
+                <!-- SCREEN 1: INTRO -->
+                <div id="screen-intro" class="fade-in text-center space-y-6">
+                    <div class="inline-block glass-inner text-blue-200 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase border border-blue-400/30">
+                        Navigate Your Future
+                    </div>
+                    <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight">Discover Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">Ideal Path</span></h1>
+                    <p class="text-blue-100/80 leading-relaxed max-w-xl mx-auto text-lg">
+                        Our advanced evaluator analyzes your distinct traits and aptitudes to recommend the most optimal academic programs and career trajectories.
+                    </p>
+                    <div class="pt-6 pb-2">
+                        <button onclick="app.startQuiz()" class="btn-primary text-white font-bold py-4 px-12 rounded-xl text-lg shadow-lg backdrop-blur-sm">
+                            Begin Evaluation
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SCREEN 2: QUIZ -->
+                <div id="screen-quiz" class="hidden fade-in">
+                    <div class="flex justify-between items-center mb-8">
+                        <span class="text-sm font-bold text-blue-200/60 uppercase tracking-wider" id="question-counter">Question 1 of 18</span>
+                        <div class="w-2/3 glass-inner rounded-full h-2 overflow-hidden">
+                            <div class="bg-blue-500 h-full rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(59,130,246,0.5)]" id="progress-bar" style="width: 5%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-inner rounded-2xl p-8 mb-10 text-center min-h-[160px] flex items-center justify-center shadow-sm">
+                        <h2 class="text-2xl font-bold text-white leading-snug" id="question-text">Question goes here</h2>
+                    </div>
+
+                    <p class="text-center text-sm font-semibold text-blue-200/60 mb-5 uppercase tracking-wide">Select your level of agreement</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <button onclick="app.answer(1)" class="option-btn glass-inner py-4 px-2 rounded-xl text-white font-semibold shadow-sm">1<br><span class="text-xs text-blue-200/50 font-normal mt-1 block">Strongly Disagree</span></button>
+                        <button onclick="app.answer(2)" class="option-btn glass-inner py-4 px-2 rounded-xl text-white font-semibold shadow-sm">2<br><span class="text-xs text-blue-200/50 font-normal mt-1 block">Disagree</span></button>
+                        <button onclick="app.answer(3)" class="option-btn glass-inner py-4 px-2 rounded-xl text-white font-semibold shadow-sm">3<br><span class="text-xs text-blue-200/50 font-normal mt-1 block">Neutral</span></button>
+                        <button onclick="app.answer(4)" class="option-btn glass-inner py-4 px-2 rounded-xl text-white font-semibold shadow-sm">4<br><span class="text-xs text-blue-200/50 font-normal mt-1 block">Agree</span></button>
+                        <button onclick="app.answer(5)" class="option-btn glass-inner py-4 px-2 rounded-xl text-white font-semibold shadow-sm">5<br><span class="text-xs text-blue-200/50 font-normal mt-1 block">Strongly Agree</span></button>
+                    </div>
+                </div>
+
+                <!-- SCREEN 3: RESULTS -->
+                <div id="screen-result" class="hidden fade-in text-center">
+                    <h2 class="text-3xl font-extrabold mb-2 text-white">Your Aptitude Profile</h2>
+                    <p class="text-blue-300 font-medium mb-8" id="save-status">Computing results...</p>
+
+                    <div class="relative w-full max-w-md mx-auto h-64 md:h-80 mb-8 glass-inner rounded-full p-4">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+
+                    <div id="recommendation-box" class="glass-inner p-8 text-left rounded-2xl mb-10 shadow-sm relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-2 h-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
+                        <!-- Recommendation content injected via JS -->
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button onclick="app.resetQuiz()" class="glass-inner hover:bg-white/10 text-white font-semibold py-3 px-8 rounded-xl shadow-sm transition backdrop-blur-sm">
+                            Retake Evaluation
+                        </button>
+                        <button onclick="app.showScreen('history')" class="btn-primary text-white font-semibold py-3 px-8 rounded-xl shadow-md backdrop-blur-sm">
+                            View My History
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SCREEN 4: HISTORY -->
+                <div id="screen-history" class="hidden fade-in">
+                    <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
+                        <h2 class="text-2xl font-extrabold text-white">Evaluation History</h2>
+                        <button onclick="app.showScreen('intro')" class="text-blue-200 hover:text-white transition font-semibold text-sm flex items-center gap-1">
+                            &larr; Back to Home
+                        </button>
+                    </div>
+                    
+                    <div id="history-list" class="space-y-4 max-h-[400px] overflow-y-auto pr-3 custom-scrollbar">
+                        <!-- History items injected via JS -->
+                        <div class="text-center text-blue-200/50 py-12">Loading records...</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Creator Credit Footer -->
+        <footer class="mt-8 mb-6 text-center z-10 fade-in">
+            <p class="text-sm font-medium text-blue-200/60 tracking-wide uppercase">
+                Edutrack Evaluator System
+            </p>
+            <p class="text-sm mt-1 text-blue-100/40">
+                Created by: <span class="text-white font-bold tracking-wide">Saide Sande</span>
+            </p>
+        </footer>
+
+    </main>
+
+    <!-- Professional Network Nodes Animation -->
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('network-canvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.vx = (Math.random() - 0.5) * 0.8;
+                    this.vy = (Math.random() - 0.5) * 0.8;
+                    this.radius = Math.random() * 1.5 + 0.5;
+                }
+
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+
+                    // Bounce off edges
+                    if (this.x < 0 || this.x > canvas.width) this.vx = -this.vx;
+                    if (this.y < 0 || this.y > canvas.height) this.vy = -this.vy;
+                }
+
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.fill();
+                }
+            }
+
+            // Create particles based on screen size
+            const particleCount = window.innerWidth > 768 ? 90 : 40;
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distance < 120) {
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            const opacity = 1 - (distance / 120);
+                            ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.15})`;
+                            ctx.lineWidth = 1;
+                            ctx.stroke();
+                        }
+                    }
+                }
+                requestAnimationFrame(animate);
+            }
+            animate();
+        });
+    </script>
+
+    <!-- Firebase and Application Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // === QUESTION BANK ===
+        const questions = [
+            { text: "I like fixing electrical things or machinery.", type: "Realistic" },
+            { text: "I prefer working outdoors rather than in an office.", type: "Realistic" },
+            { text: "I enjoy building things with my hands.", type: "Realistic" },
+            { text: "I enjoy solving complex math or logic puzzles.", type: "Investigative" },
+            { text: "I like conducting scientific experiments.", type: "Investigative" },
+            { text: "I love analyzing data to find patterns.", type: "Investigative" },
+            { text: "I enjoy designing visual layouts or creating art.", type: "Artistic" },
+            { text: "I like expressing myself through writing, acting, or music.", type: "Artistic" },
+            { text: "I prefer tasks that allow me to be creative and original.", type: "Artistic" },
+            { text: "I love helping people solve their personal problems.", type: "Social" },
+            { text: "I enjoy teaching others new skills.", type: "Social" },
+            { text: "I like volunteering in my community to help those in need.", type: "Social" },
+            { text: "I enjoy taking charge and leading a group.", type: "Enterprising" },
+            { text: "I like to persuade people to see things my way.", type: "Enterprising" },
+            { text: "I am interested in starting my own business.", type: "Enterprising" },
+            { text: "I am very organized and like keeping detailed records.", type: "Conventional" },
+            { text: "I prefer clear rules and strict procedures in my work.", type: "Conventional" },
+            { text: "I am good at managing spreadsheets and finances.", type: "Conventional" }
+        ];
+
+        function shuffle(array) {
+            let currentIndex = array.length,  randomIndex;
+            while (currentIndex > 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        const state = {
+            currentScreen: 'intro',
+            questionIndex: 0,
+            shuffledQuestions: [],
+            scores: { Realistic: 0, Investigative: 0, Artistic: 0, Social: 0, Enterprising: 0, Conventional: 0 },
+            chartInstance: null,
+            history: []
+        };
+
+        let db, auth, currentUser;
+        let unsubscribeHistory = null;
+        
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'demo-edutrack-app';
+        const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        const ui = {
+            showToast: (msg, type = 'info') => {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                const bg = type === 'error' ? 'bg-red-500/90' : (type === 'success' ? 'bg-emerald-500/90' : 'bg-slate-800/90');
+                toast.className = `${bg} backdrop-blur-md text-white px-5 py-3 rounded-xl shadow-xl font-medium text-sm fade-in flex justify-between items-center border border-white/20`;
+                toast.innerHTML = `<span>${msg}</span>`;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(-10px)';
+                    toast.style.transition = 'all 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            },
+            switchScreen: (screenId) => {
+                ['screen-intro', 'screen-quiz', 'screen-result', 'screen-history'].forEach(id => {
+                    document.getElementById(id).classList.add('hidden');
+                    const el = document.getElementById(id);
+                    el.classList.remove('fade-in');
+                    void el.offsetWidth;
+                    el.classList.add('fade-in');
+                });
+                document.getElementById(`screen-${screenId}`).classList.remove('hidden');
+                state.currentScreen = screenId;
+            }
+        };
+
+        window.app = {
+            init: async () => {
+                if (firebaseConfigStr) {
+                    try {
+                        const firebaseConfig = JSON.parse(firebaseConfigStr);
+                        const fbApp = initializeApp(firebaseConfig);
+                        auth = getAuth(fbApp);
+                        db = getFirestore(fbApp);
+
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+
+                        onAuthStateChanged(auth, (user) => {
+                            currentUser = user;
+                            if (user) {
+                                document.getElementById('history-btn').classList.remove('hidden');
+                                window.app.listenToHistory();
+                            }
+                        });
+                    } catch (e) {
+                        console.error("Firebase init error:", e);
+                        ui.showToast("Running in local mode (Offline)", "error");
+                    }
+                }
+            },
+
+            showScreen: (screenId) => {
+                ui.switchScreen(screenId);
+                if(screenId === 'history') window.app.renderHistory();
+            },
+
+            startQuiz: () => {
+                state.shuffledQuestions = shuffle([...questions]);
+                state.questionIndex = 0;
+                state.scores = { Realistic: 0, Investigative: 0, Artistic: 0, Social: 0, Enterprising: 0, Conventional: 0 };
+                ui.switchScreen('quiz');
+                window.app.loadQuestion();
+            },
+
+            loadQuestion: () => {
+                const q = state.shuffledQuestions[state.questionIndex];
+                document.getElementById('question-text').innerText = `"${q.text}"`;
+                document.getElementById('question-counter').innerText = `Question ${state.questionIndex + 1} of ${state.shuffledQuestions.length}`;
+                
+                const progress = ((state.questionIndex) / state.shuffledQuestions.length) * 100;
+                document.getElementById('progress-bar').style.width = `${progress}%`;
+            },
+
+            answer: (value) => {
+                const category = state.shuffledQuestions[state.questionIndex].type;
+                state.scores[category] += value;
+                
+                state.questionIndex++;
+                if (state.questionIndex < state.shuffledQuestions.length) {
+                    window.app.loadQuestion();
+                } else {
+                    window.app.finishQuiz();
+                }
+            },
+
+            finishQuiz: () => {
+                ui.switchScreen('result');
+                document.getElementById('progress-bar').style.width = `100%`;
+                window.app.renderChart();
+                const resultData = window.app.generateRecommendation();
+                window.app.saveResult(resultData);
+            },
+
+            generateRecommendation: () => {
+                const s = state.scores;
+                const dominantTrait = Object.keys(s).reduce((a, b) => s[a] > s[b] ? a : b);
+                
+                const adviceMap = {
+                    "Realistic": { 
+                        title: "The Doer (Realistic)", 
+                        desc: "You thrive in practical environments. You prefer working with your hands, operating machinery, or utilizing technology over abstract theories.", 
+                        courses: "• BS Radiologic Technology" 
+                    },
+                    "Investigative": { 
+                        title: "The Thinker (Investigative)", 
+                        desc: "You love analyzing, studying, and solving complex academic, scientific, or mathematical problems.", 
+                        courses: "• BS Medical Laboratory Science (MedTech)<br>• BS Pharmacy<br>• BSED Major in Science<br>• BSED Major in Mathematics" 
+                    },
+                    "Artistic": { 
+                        title: "The Creator (Artistic)", 
+                        desc: "You value self-expression, communication, and prefer environments that allow you to be creative and original with language or media.", 
+                        courses: "• AB Communication<br>• AB English Language Studies" 
+                    },
+                    "Social": { 
+                        title: "The Helper (Social)", 
+                        desc: "You excel at communicating, teaching, and supporting the health, education, and growth of others.", 
+                        courses: "• BS Nursing<br>• BEED (Bachelor of Elementary Education)<br>• BSED Major in English / Math / Science<br>• BS Tourism Management" 
+                    },
+                    "Enterprising": { 
+                        title: "The Persuader (Enterprising)", 
+                        desc: "You are a natural leader who enjoys taking initiative, public service, persuasion, and managing people or organizations.", 
+                        courses: "• AB Political Science<br>• BS Public Administration<br>• BS Tourism Management" 
+                    },
+                    "Conventional": { 
+                        title: "The Organizer (Conventional)", 
+                        desc: "You are detail-oriented, highly organized, and prefer structured tasks, exact records, and analyzing historical or administrative data.", 
+                        courses: "• AB History<br>• BS Pharmacy<br>• BS Public Administration" 
+                    }
+                };
+
+                const advice = adviceMap[dominantTrait];
+                
+                document.getElementById('recommendation-box').innerHTML = `
+                    <h3 class="font-extrabold text-2xl text-white mb-2">Dominant Trait: <span class="text-blue-400">${advice.title}</span></h3>
+                    <p class="text-blue-50/80 mb-6 text-sm leading-relaxed">${advice.desc}</p>
+                    <div class="glass-inner p-5 rounded-xl">
+                        <p class="text-xs text-blue-200 uppercase tracking-widest font-bold mb-3 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            Suggested Programs For You
+                        </p>
+                        <p class="text-sm text-white font-semibold leading-relaxed">${advice.courses}</p>
+                    </div>
+                `;
+
+                const cleanCourses = advice.courses.replace(/<br>/g, ', ').replace(/• /g, '');
+
+                return {
+                    date: new Date().toISOString(),
+                    scores: state.scores,
+                    dominantTrait: dominantTrait,
+                    recommendation: cleanCourses
+                };
+            },
+
+            renderChart: () => {
+                const ctx = document.getElementById('radarChart').getContext('2d');
+                if (state.chartInstance) state.chartInstance.destroy();
+
+                const s = state.scores;
+                const maxPossible = 15; 
+
+                state.chartInstance = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Realistic', 'Investigative', 'Artistic', 'Social', 'Enterprising', 'Conventional'],
+                        datasets: [{
+                            label: 'Score',
+                            data: [s.Realistic, s.Investigative, s.Artistic, s.Social, s.Enterprising, s.Conventional],
+                            backgroundColor: 'rgba(59, 130, 246, 0.3)', 
+                            borderColor: 'rgba(96, 165, 250, 1)', 
+                            pointBackgroundColor: '#60a5fa', 
+                            pointBorderColor: '#ffffff',
+                            pointHoverBackgroundColor: '#ffffff',
+                            pointHoverBorderColor: '#60a5fa',
+                            borderWidth: 2,
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                angleLines: { color: 'rgba(255,255,255,0.1)' },
+                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                beginAtZero: true,
+                                max: maxPossible,
+                                ticks: { display: false },
+                                pointLabels: { font: { size: 12, family: 'Inter', weight: 'bold' }, color: 'rgba(255,255,255,0.8)' }
+                            }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            },
+
+            saveResult: async (resultData) => {
+                const statusEl = document.getElementById('save-status');
+                if (!currentUser || !db) {
+                    statusEl.innerText = "Evaluation complete! (Offline mode - not saved)";
+                    return;
+                }
+
+                statusEl.innerText = "Saving profile to your account...";
+                try {
+                    const collRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'evaluations');
+                    await addDoc(collRef, resultData);
+                    statusEl.innerHTML = "<span class='text-emerald-400'>✓ Profile Saved Securely</span>";
+                } catch (e) {
+                    console.error("Save error:", e);
+                    statusEl.innerText = "Evaluation complete! (Failed to save)";
+                }
+            },
+
+            listenToHistory: () => {
+                if (!currentUser || !db) return;
+                const collRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'evaluations');
+                
+                unsubscribeHistory = onSnapshot(collRef, (snapshot) => {
+                    const records = [];
+                    snapshot.forEach(doc => { records.push({ id: doc.id, ...doc.data() }); });
+                    records.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    state.history = records;
+                    if(state.currentScreen === 'history') window.app.renderHistory();
+                }, (error) => console.error("History fetch error:", error));
+            },
+
+            renderHistory: () => {
+                const listEl = document.getElementById('history-list');
+                listEl.innerHTML = '';
+
+                if (state.history.length === 0) {
+                    listEl.innerHTML = '<div class="text-center text-blue-200/50 py-10 glass-inner rounded-xl">No evaluations taken yet.</div>';
+                    return;
+                }
+
+                state.history.forEach((record, index) => {
+                    const dateObj = new Date(record.date);
+                    const formattedDate = dateObj.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                    
+                    const el = document.createElement('div');
+                    el.className = 'glass-inner rounded-2xl p-5 shadow-sm transition hover:bg-white/10';
+                    
+                    const badgeColor = index === 0 ? 'bg-blue-500/20 text-blue-200 border border-blue-400/30' : 'bg-white/5 text-white/50 border border-white/10';
+
+                    el.innerHTML = `
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-xs font-bold ${badgeColor} px-3 py-1 rounded-full uppercase tracking-wider">${index === 0 ? 'Latest Result' : 'Past Record'}</span>
+                            <span class="text-xs font-semibold text-blue-200/40">${formattedDate}</span>
+                        </div>
+                        <h4 class="font-extrabold text-lg text-white mb-1">${record.dominantTrait}</h4>
+                        <p class="text-sm text-blue-100/70 line-clamp-2"><strong>Paths:</strong> ${record.recommendation}</p>
+                    `;
+                    listEl.appendChild(el);
+                });
+            },
+
+            resetQuiz: () => ui.switchScreen('intro')
+        };
+
+        window.addEventListener('DOMContentLoaded', window.app.init);
+
+    </script>
+</body>
+</html>
